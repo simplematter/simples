@@ -14,6 +14,7 @@ private fun usage() {
     System.err.println()
     System.err.println("Usage:  java -jar simples.jar [-u] [-s] [-p port] dir [prefix]")
     System.err.println("         -u       Enable uploads")
+    System.err.println("         -i       Enable index files (index.html, index.htm)")
     System.err.println("         -s       https: (insecure self-signed certificate)")
     System.err.println("         -p port  Set port (default 6001)")
     System.err.println("         dir      Directory to serve")
@@ -31,6 +32,7 @@ private fun usage() {
 
 fun main(args:  Array<String>) {
     var enableUpload = false;
+    var enableIndexFiles = false;
     var port = 6001
     var urlBase = ""
     var argsUsed = 0;
@@ -38,6 +40,9 @@ fun main(args:  Array<String>) {
     while (args.size > argsUsed && args[argsUsed].startsWith("-")) {
         if (args[argsUsed] == "-u") {
             enableUpload = true;
+            argsUsed++;
+        } else if (args[argsUsed] == "-i") {
+            enableIndexFiles = true;
             argsUsed++;
         } else if (args[argsUsed] == "-s") {
             enableSsl = true;
@@ -78,8 +83,14 @@ fun main(args:  Array<String>) {
             System.out.println(s)
         }
     }
-    val sh = SimpleHttp(baseDir, urlBase, port, enableUpload, enableSsl, 
-                        "uploads", logger)
+    val sh = SimpleHttp(baseDir,
+        urlBase,
+        port,
+        enableUpload,
+        enableIndexFiles,
+        enableSsl,
+        "uploads",
+        logger)
     println()
     println("Serving files from " + baseDir.canonicalPath
             + " at " + sh.publicURL)

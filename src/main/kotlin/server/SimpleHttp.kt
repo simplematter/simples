@@ -66,6 +66,7 @@ class SimpleHttp(private val baseDir: File,
                  private val urlBase: String,
                  port: Int,
                  private val enableUpload : Boolean,
+                 private val enableIndexFiles: Boolean,
                  enableSsl: Boolean,
                  private val uploadsSuffix: String,
                  val logger: Logger)
@@ -98,7 +99,12 @@ class SimpleHttp(private val baseDir: File,
                 return ErrorQueryHandler("File does note exist:  " + f, rawOut, out)
             }
             if (f.isDirectory) {
-                return DirectoryQuery(publicURL, baseDir, f, rawOut, out, enableUpload)
+                val indexFile = f.listFiles().find { it.isFile && indexFiles.contains(it.name.toLowerCase()) }
+                if(indexFile == null) {
+                    return DirectoryQuery(publicURL, baseDir, f, rawOut, out, enableUpload)
+                } else {
+                    return FileQuery(indexFile, rawOut, out, this)
+                }
             } else {
                 return FileQuery(f, rawOut, out, this)
             }
@@ -176,5 +182,6 @@ class SimpleHttp(private val baseDir: File,
             return scheme + "://" + localInetAddress.hostAddress + ":" + port + urlBase
         }
 
+    private val indexFiles = setOf<String>("index.html", "index.htm")
 }
 
